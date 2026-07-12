@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;background:oklch(98% 0.006 264);}
+  *{box-sizing:border-box;}
+  a{color:oklch(52% 0.16 264);text-decoration:none;}
+  a:hover{color:oklch(42% 0.16 264);text-decoration:underline;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:oklch(88% 0.01 264);border-radius:6px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes popIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</helmet>
+
+<div style="min-height:100vh;width:100%;background:oklch(98% 0.006 264);color:oklch(22% 0.02 264);display:flex;flex-direction:column;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:#ffffff;border-bottom:1px solid oklch(90% 0.01 264);position:sticky;top:0;z-index:10;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:38px;height:38px;border-radius:10px;background:oklch(52% 0.16 264);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;">Σ</div>
+      <div>
+        <div style="font-weight:700;font-size:15px;line-height:1.2;">Metakognitif AI</div>
+        <div style="font-size:12px;color:oklch(48% 0.02 264);line-height:1.2;">Aljabar Linear · Matriks</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <sc-if value="{{ hasActiveStudent }}">
+        <div style="font-size:13px;color:oklch(48% 0.02 264);">Masuk sebagai <strong style="color:oklch(22% 0.02 264);">{{ studentName }}</strong></div>
+      </sc-if>
+      <button onClick="{{ goDosen }}" style="border:1px solid oklch(52% 0.16 304);background:oklch(95% 0.03 304);color:oklch(42% 0.16 304);font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;flex:none;">Panel Dosen</button>
+    </div>
+  </div>
+
+  <sc-if value="{{ screenLanding }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px;text-align:center;animation:fadeUp 0.5s ease;">
+    <div style="width:96px;height:96px;border-radius:50%;background:oklch(52% 0.16 264);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:40px;margin-bottom:20px;box-shadow:0 8px 24px oklch(52% 0.16 264 / 0.25);">N</div>
+    <div style="font-size:13px;font-weight:600;color:oklch(52% 0.16 304);letter-spacing:0.02em;margin-bottom:10px;">Nasrullah · Asisten Belajar AI</div>
+    <h1 style="font-size:36px;font-weight:700;margin:0 0 14px;max-width:640px;line-height:1.25;">Belajar Matriks dalam Aljabar Linear, dari Konkret sampai Abstrak</h1>
+    <p style="font-size:16px;color:oklch(48% 0.02 264);max-width:520px;line-height:1.6;margin:0 0 32px;">Ikuti animasi penjelasan bertahap (Concrete → Pictorial → Abstract), lalu uji pemahamanmu lewat 10 soal interaktif dengan pendampingan reflektif dari Nasrullah.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button onClick="{{ goRegister }}" style="background:oklch(52% 0.16 264);color:#fff;border:none;font-size:15px;font-weight:600;padding:14px 28px;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px oklch(52% 0.16 264 / 0.3);">Mulai Belajar</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:36px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:oklch(95% 0.05 80);color:oklch(45% 0.14 80);">Joyful Learning</span>
+      <span style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:oklch(95% 0.03 264);color:oklch(42% 0.16 264);">Meaningful Learning</span>
+      <span style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:oklch(95% 0.03 200);color:oklch(38% 0.10 200);">Mindful Learning</span>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ screenRegister }}">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 24px;animation:fadeUp 0.4s ease;">
+    <div style="width:100%;max-width:420px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:16px;padding:32px;box-shadow:0 2px 12px oklch(20% 0.02 264 / 0.06);">
+      <h2 style="font-size:20px;font-weight:700;margin:0 0 6px;">Registrasi Mahasiswa</h2>
+      <p style="font-size:13px;color:oklch(48% 0.02 264);margin:0 0 24px;">Data kamu akan tercatat di sistem agar dosen bisa melihat rekap hasil belajarmu.</p>
+
+      <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Nama Lengkap</label>
+      <input value="{{ formNama }}" onChange="{{ onNamaChange }}" placeholder="Contoh: Siti Aisyah" style="width:100%;padding:11px 12px;border:1px solid oklch(88% 0.01 264);border-radius:8px;font-size:14px;margin-bottom:16px;outline:none;"/>
+
+      <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">NIM</label>
+      <input value="{{ formNim }}" onChange="{{ onNimChange }}" placeholder="Contoh: 2210103045" style="width:100%;padding:11px 12px;border:1px solid oklch(88% 0.01 264);border-radius:8px;font-size:14px;margin-bottom:16px;outline:none;"/>
+
+      <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Kelas / Prodi</label>
+      <input value="{{ formKelas }}" onChange="{{ onKelasChange }}" placeholder="Contoh: TI-2B" style="width:100%;padding:11px 12px;border:1px solid oklch(88% 0.01 264);border-radius:8px;font-size:14px;margin-bottom:8px;outline:none;"/>
+
+      <sc-if value="{{ registerError }}">
+        <div style="font-size:13px;color:oklch(55% 0.18 25);margin-bottom:8px;">{{ registerError }}</div>
+      </sc-if>
+
+      <button onClick="{{ submitRegister }}" style="width:100%;margin-top:14px;background:oklch(52% 0.16 264);color:#fff;border:none;font-size:14px;font-weight:600;padding:13px;border-radius:8px;cursor:pointer;">Daftar &amp; Mulai</button>
+      <button onClick="{{ goLanding }}" style="width:100%;margin-top:8px;background:transparent;color:oklch(48% 0.02 264);border:none;font-size:13px;padding:8px;cursor:pointer;">Kembali</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ screenCpa }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;animation:fadeUp 0.4s ease;">
+    <div style="display:flex;gap:8px;margin-bottom:28px;">
+      <sc-for list="{{ cpaDots }}" as="dot" hint-placeholder-count="3">
+        <div style="width:{{ dot.width }};height:8px;border-radius:4px;background:{{ dot.bg }};transition:all 0.3s ease;"></div>
+      </sc-for>
+    </div>
+
+    <div style="width:100%;max-width:640px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:18px;padding:36px;box-shadow:0 4px 20px oklch(20% 0.02 264 / 0.07);animation:popIn 0.4s ease;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <span style="font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:{{ cpaBadgeBg }};color:{{ cpaBadgeColor }};">{{ cpaStageLabel }}</span>
+        <span style="font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;background:oklch(96% 0.01 264);color:oklch(48% 0.02 264);">{{ cpaDlLabel }}</span>
+      </div>
+
+      <h2 style="font-size:23px;font-weight:700;margin:0 0 16px;">{{ cpaTitle }}</h2>
+
+      <div style="min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <sc-if value="{{ cpaIsConcrete }}">
+          <div style="display:flex;gap:16px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:oklch(48% 0.02 264);margin-bottom:6px;font-weight:600;">Rak 1</div>
+              <div style="display:flex;gap:6px;">
+                <div style="width:52px;height:52px;border-radius:10px;background:oklch(95% 0.05 80);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;">👕<span style="font-size:10px;color:oklch(48% 0.02 264);">4</span></div>
+                <div style="width:52px;height:52px;border-radius:10px;background:oklch(95% 0.03 264);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;">👖<span style="font-size:10px;color:oklch(48% 0.02 264);">3</span></div>
+              </div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:oklch(48% 0.02 264);margin-bottom:6px;font-weight:600;">Rak 2</div>
+              <div style="display:flex;gap:6px;">
+                <div style="width:52px;height:52px;border-radius:10px;background:oklch(95% 0.05 80);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;">👕<span style="font-size:10px;color:oklch(48% 0.02 264);">2</span></div>
+                <div style="width:52px;height:52px;border-radius:10px;background:oklch(95% 0.03 264);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;">👖<span style="font-size:10px;color:oklch(48% 0.02 264);">5</span></div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cpaIsPictorial }}">
+          <div style="display:grid;grid-template-columns:60px 70px 70px;gap:0;border:2px solid oklch(52% 0.16 264);border-radius:8px;overflow:hidden;font-family:ui-monospace,Menlo,monospace;font-size:15px;">
+            <div style="background:oklch(95% 0.03 264);padding:10px;font-weight:700;color:oklch(42% 0.16 264);"></div>
+            <div style="background:oklch(95% 0.03 264);padding:10px;font-weight:700;text-align:center;">Baju</div>
+            <div style="background:oklch(95% 0.03 264);padding:10px;font-weight:700;text-align:center;">Celana</div>
+            <div style="background:oklch(95% 0.03 264);padding:10px;font-weight:700;color:oklch(42% 0.16 264);">Rak 1</div>
+            <div style="padding:10px;text-align:center;border-top:1px solid oklch(90% 0.01 264);">4</div>
+            <div style="padding:10px;text-align:center;border-top:1px solid oklch(90% 0.01 264);">3</div>
+            <div style="background:oklch(95% 0.03 264);padding:10px;font-weight:700;color:oklch(42% 0.16 264);">Rak 2</div>
+            <div style="padding:10px;text-align:center;border-top:1px solid oklch(90% 0.01 264);">2</div>
+            <div style="padding:10px;text-align:center;border-top:1px solid oklch(90% 0.01 264);">5</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cpaIsAbstract }}">
+          <div style="font-family:ui-monospace,Menlo,monospace;font-size:20px;line-height:1.6;color:oklch(22% 0.02 264);background:oklch(97% 0.006 264);border:1px solid oklch(90% 0.01 264);border-radius:10px;padding:18px 30px;">
+            <div>A = [ 4&nbsp;&nbsp;3 ]</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;[ 2&nbsp;&nbsp;5 ]</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <p style="font-size:15px;line-height:1.65;color:oklch(30% 0.02 264);margin:0 0 10px;">{{ cpaNarration }}</p>
+      <p style="font-size:13px;line-height:1.6;color:oklch(48% 0.02 264);margin:0 0 26px;">{{ cpaDetail }}</p>
+
+      <div style="display:flex;justify-content:space-between;gap:10px;">
+        <button onClick="{{ cpaBack }}" style="background:transparent;border:1px solid oklch(88% 0.01 264);color:oklch(48% 0.02 264);font-size:13px;font-weight:600;padding:11px 20px;border-radius:8px;cursor:pointer;">Kembali</button>
+        <button onClick="{{ cpaNext }}" style="background:oklch(52% 0.16 264);border:none;color:#fff;font-size:13px;font-weight:600;padding:11px 24px;border-radius:8px;cursor:pointer;">{{ cpaNextLabel }}</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ screenQuiz }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:36px 24px 60px;">
+    <div style="width:100%;max-width:680px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;color:oklch(48% 0.02 264);">Soal {{ quizNumber }} dari 10</div>
+        <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:{{ quizBadgeBg }};color:{{ quizBadgeColor }};">{{ quizDl }}</span>
+      </div>
+      <div style="width:100%;height:6px;background:oklch(92% 0.01 264);border-radius:3px;margin-bottom:24px;overflow:hidden;">
+        <div style="height:100%;background:oklch(52% 0.16 264);border-radius:3px;transition:width 0.3s ease;width:{{ quizProgressPct }};"></div>
+      </div>
+
+      <div style="background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:16px;padding:30px;box-shadow:0 2px 14px oklch(20% 0.02 264 / 0.06);animation:popIn 0.35s ease;">
+        <div style="font-size:11px;font-weight:700;color:oklch(52% 0.16 304);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">{{ quizStageLabel }}</div>
+        <h3 style="font-size:18px;font-weight:700;line-height:1.5;margin:0 0 22px;">{{ quizPrompt }}</h3>
+
+        <sc-if value="{{ quizNotAnswered }}">
+          <div style="margin-bottom:20px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Seberapa yakin kamu dengan jawabanmu? ({{ confidenceBefore }}/5)</div>
+            <input type="range" min="1" max="5" step="1" value="{{ confidenceBefore }}" onChange="{{ onConfidenceBeforeChange }}" style="width:100%;"/>
+          </div>
+
+          <sc-if value="{{ quizIsMc }}">
+            <sc-for list="{{ mcRows }}" as="row" hint-placeholder-count="4">
+              <div onClick="{{ row.onClick }}" style="{{ row.style }}">{{ row.text }}</div>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ quizIsMatch }}">
+            <sc-for list="{{ matchRows }}" as="row" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                <div style="flex:1;font-size:14px;padding:10px 14px;background:oklch(97% 0.006 264);border-radius:8px;">{{ row.text }}</div>
+                <div style="font-size:14px;color:oklch(60% 0.01 264);">→</div>
+                <select value="{{ row.selected }}" onChange="{{ row.onChange }}" style="flex:1;padding:10px 12px;border:1px solid oklch(88% 0.01 264);border-radius:8px;font-size:14px;">
+                  <option value="">Pilih jodoh...</option>
+                  <sc-for list="{{ row.options }}" as="opt">
+                    <option value="{{ opt.value }}">{{ opt.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ quizIsFill }}">
+            <input value="{{ fillValue }}" onChange="{{ onFillChange }}" placeholder="{{ quizFillPlaceholder }}" style="width:100%;padding:13px 14px;border:1px solid oklch(88% 0.01 264);border-radius:8px;font-size:15px;margin-bottom:6px;"/>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:22px;">
+            <button onClick="{{ toggleHint }}" style="background:transparent;border:1px solid oklch(95% 0.03 304);color:oklch(42% 0.16 304);font-size:13px;font-weight:600;padding:10px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;flex:none;">💡 Tanya Nasrullah</button>
+            <button onClick="{{ submitAnswer }}" disabled="{{ submitDisabled }}" style="{{ submitButtonStyle }}">Jawab</button>
+          </div>
+
+          <sc-if value="{{ hintShown }}">
+            <div style="margin-top:16px;padding:14px 16px;background:oklch(95% 0.03 304);border-radius:10px;font-size:13px;line-height:1.55;color:oklch(30% 0.02 264);display:flex;gap:10px;">
+              <div style="width:26px;height:26px;flex:none;border-radius:50%;background:oklch(52% 0.16 304);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">N</div>
+              <div>{{ quizHint }}</div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ quizAnswered }}">
+          <div style="{{ feedbackBannerStyle }}">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="width:30px;height:30px;flex:none;border-radius:50%;background:oklch(52% 0.16 264);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">N</div>
+              <div style="font-weight:700;font-size:14px;">{{ feedbackHeadline }}</div>
+            </div>
+            <div style="font-size:13.5px;line-height:1.6;color:oklch(30% 0.02 264);">{{ quizExplanation }}</div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Refleksi: setelah tahu jawabannya, seberapa yakin kamu sekarang? ({{ confidenceAfter }}/5)</div>
+            <input type="range" min="1" max="5" step="1" value="{{ confidenceAfter }}" onChange="{{ onConfidenceAfterChange }}" style="width:100%;"/>
+          </div>
+
+          <button onClick="{{ nextQuestion }}" style="width:100%;margin-top:20px;background:oklch(52% 0.16 264);border:none;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:8px;cursor:pointer;">{{ nextButtonLabel }}</button>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ screenResults }}">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:44px 24px 60px;">
+    <div style="width:100%;max-width:640px;">
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:600;color:oklch(52% 0.16 304);margin-bottom:6px;">Refleksi Akhir · Mindful Learning</div>
+        <h2 style="font-size:26px;font-weight:700;margin:0 0 8px;">Kerja bagus, {{ studentName }}!</h2>
+        <p style="font-size:14px;color:oklch(48% 0.02 264);margin:0;">Kamu menjawab benar {{ correctCount }} dari 10 soal.</p>
+      </div>
+
+      <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:150px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:32px;font-weight:700;color:oklch(52% 0.16 264);">{{ scorePct }}%</div>
+          <div style="font-size:12px;color:oklch(48% 0.02 264);margin-top:4px;">Skor Akhir</div>
+        </div>
+        <div style="flex:1;min-width:150px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:32px;font-weight:700;color:oklch(52% 0.16 304);">{{ avgConfBefore }}</div>
+          <div style="font-size:12px;color:oklch(48% 0.02 264);margin-top:4px;">Rata Keyakinan Awal /5</div>
+        </div>
+        <div style="flex:1;min-width:150px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:32px;font-weight:700;color:oklch(42% 0.12 200);">{{ avgConfAfter }}</div>
+          <div style="font-size:12px;color:oklch(48% 0.02 264);margin-top:4px;">Rata Keyakinan Akhir /5</div>
+        </div>
+      </div>
+
+      <sc-if value="{{ recordSaved }}" hint-placeholder-val="{{ false }}">
+        <div style="background:oklch(95% 0.04 145);border-radius:12px;padding:16px 18px;font-size:13.5px;color:oklch(35% 0.1 145);margin-bottom:24px;">Jawabanmu tersimpan di sistem dan sudah bisa dilihat dosen di Panel Dosen.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <button onClick="{{ exportOwnPdf }}" style="flex:1;min-width:160px;background:oklch(52% 0.16 264);border:none;color:#fff;font-size:13.5px;font-weight:600;padding:12px;border-radius:8px;cursor:pointer;">⬇ Unduh PDF</button>
+          <button onClick="{{ exportOwnExcel }}" style="flex:1;min-width:160px;background:oklch(52% 0.16 304);border:none;color:#fff;font-size:13.5px;font-weight:600;padding:12px;border-radius:8px;cursor:pointer;">⬇ Unduh Excel</button>
+        </div>
+        <button onClick="{{ goLanding }}" style="width:100%;background:transparent;border:1px solid oklch(88% 0.01 264);color:oklch(48% 0.02 264);font-size:13.5px;font-weight:600;padding:12px;border-radius:8px;cursor:pointer;">Kembali ke Beranda</button>
+      </sc-if>
+
+      <sc-if value="{{ recordNotSaved }}">
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:13.5px;font-weight:600;margin-bottom:8px;">Tuliskan refleksimu: apa yang paling kamu pahami, dan apa yang masih membingungkan?</label>
+          <textarea value="{{ reflectionText }}" onChange="{{ onReflectionChange }}" rows="4" placeholder="Contoh: Aku sudah paham cara menulis persamaan dari cerita, tapi masih bingung membaca bentuk matriks." style="width:100%;padding:12px 14px;border:1px solid oklch(88% 0.01 264);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <button onClick="{{ finalizeRecord }}" style="width:100%;background:oklch(52% 0.16 264);border:none;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:8px;cursor:pointer;">Simpan &amp; Selesai</button>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ screenDosen }}">
+  <div style="flex:1;padding:36px 32px 60px;">
+    <div style="max-width:1000px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:22px;font-weight:700;margin:0 0 4px;">Panel Dosen · Rekap Mahasiswa</h2>
+          <p style="font-size:13px;color:oklch(48% 0.02 264);margin:0;">{{ dbCountLabel }}</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button onClick="{{ exportAllPdf }}" style="background:oklch(52% 0.16 264);border:none;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:8px;cursor:pointer;">⬇ Export Semua PDF</button>
+          <button onClick="{{ exportAllExcel }}" style="background:oklch(52% 0.16 304);border:none;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:8px;cursor:pointer;">⬇ Export Semua Excel</button>
+          <button onClick="{{ goLanding }}" style="background:transparent;border:1px solid oklch(88% 0.01 264);color:oklch(48% 0.02 264);font-size:13px;font-weight:600;padding:10px 16px;border-radius:8px;cursor:pointer;">Kembali</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ dbEmpty }}">
+        <div style="margin-top:40px;text-align:center;padding:60px 20px;background:#fff;border:1px dashed oklch(85% 0.01 264);border-radius:16px;">
+          <div style="font-size:15px;font-weight:600;color:oklch(40% 0.02 264);margin-bottom:6px;">Database masih kosong</div>
+          <div style="font-size:13px;color:oklch(55% 0.02 264);">Belum ada mahasiswa yang mengisi jawaban. Data akan muncul di sini otomatis setelah mahasiswa mendaftar dan menyelesaikan kuis.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ dbNotEmpty }}">
+        <div style="margin-top:20px;background:#fff;border:1px solid oklch(90% 0.01 264);border-radius:14px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 0.8fr 0.9fr 0.9fr 0.6fr;gap:8px;padding:12px 18px;background:oklch(97% 0.006 264);font-size:11.5px;font-weight:700;color:oklch(45% 0.02 264);text-transform:uppercase;letter-spacing:0.02em;">
+            <div>Nama</div><div>NIM</div><div>Kelas</div><div>Skor</div><div>Yakin Awal</div><div>Yakin Akhir</div><div></div>
+          </div>
+          <sc-for list="{{ dbRows }}" as="row" hint-placeholder-count="2">
+            <div>
+              <div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 0.8fr 0.9fr 0.9fr 0.6fr;gap:8px;padding:14px 18px;border-top:1px solid oklch(93% 0.008 264);font-size:13.5px;align-items:center;">
+                <div style="font-weight:600;">{{ row.nama }}</div>
+                <div style="color:oklch(48% 0.02 264);">{{ row.nim }}</div>
+                <div style="color:oklch(48% 0.02 264);">{{ row.kelas }}</div>
+                <div style="font-weight:700;color:{{ row.scoreColor }};">{{ row.scorePct }}%</div>
+                <div style="color:oklch(48% 0.02 264);">{{ row.confBefore }}/5</div>
+                <div style="color:oklch(48% 0.02 264);">{{ row.confAfter }}/5</div>
+                <div><button onClick="{{ row.toggle }}" style="background:transparent;border:none;color:oklch(52% 0.16 264);font-size:12.5px;font-weight:600;cursor:pointer;">{{ row.toggleLabel }}</button></div>
+              </div>
+              <sc-if value="{{ row.expanded }}">
+                <div style="padding:16px 18px 20px;background:oklch(98% 0.006 264);border-top:1px solid oklch(93% 0.008 264);">
+                  <div style="font-size:12px;color:oklch(48% 0.02 264);margin-bottom:10px;">Waktu selesai: {{ row.timestamp }}</div>
+                  <sc-for list="{{ row.answers }}" as="ans" hint-placeholder-count="2">
+                    <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed oklch(90% 0.01 264);font-size:12.5px;">
+                      <div style="flex:none;width:22px;height:22px;border-radius:6px;background:{{ ans.badgeBg }};color:{{ ans.badgeColor }};display:flex;align-items:center;justify-content:center;font-weight:700;">{{ ans.num }}</div>
+                      <div style="flex:1;">
+                        <div style="color:oklch(30% 0.02 264);">{{ ans.prompt }}</div>
+                        <div style="color:oklch(48% 0.02 264);margin-top:2px;">Jawaban: {{ ans.answerText }} · {{ ans.resultLabel }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <div style="margin-top:12px;font-size:12.5px;color:oklch(30% 0.02 264);"><strong>Refleksi:</strong> {{ row.reflection }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CPA_KEYS = ['concrete', 'pictorial', 'abstract'];
+const DL_COLORS = {
+  'Joyful Learning': { bg: 'oklch(95% 0.05 80)', color: 'oklch(45% 0.14 80)' },
+  'Meaningful Learning': { bg: 'oklch(95% 0.03 264)', color: 'oklch(42% 0.16 264)' },
+  'Mindful Learning': { bg: 'oklch(95% 0.03 200)', color: 'oklch(38% 0.10 200)' },
+};
+const DB_KEY = 'mlAljabar_students_db';
+
+function loadDb() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+function saveDb(list) {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(list)); } catch (e) {}
+}
+
+class Component extends DCLogic {
+  state = {
+    screen: 'landing',
+    QUESTIONS: [],
+    CPA_STAGES: [],
+    formNama: '', formNim: '', formKelas: '',
+    registerError: '',
+    student: null,
+    cpaStep: 0,
+    quizIndex: 0,
+    responses: [],
+    confidenceBefore: 3,
+    confidenceAfter: 3,
+    mcSelected: null,
+    matchSelections: {},
+    fillValue: '',
+    answered: false,
+    hintShown: false,
+    reflectionText: '',
+    recordSaved: false,
+    dbRecords: [],
+    expandedRows: {},
+  };
+
+  componentDidMount() {
+    import('./soal-data.js').then((m) => {
+      this.setState({ QUESTIONS: m.QUESTIONS, CPA_STAGES: m.CPA_STAGES });
+    });
+    this.setState({ dbRecords: loadDb() });
+  }
+
+  goLanding = () => this.setState({ screen: 'landing' });
+  goRegister = () => this.setState({ screen: 'register', registerError: '' });
+  goDosen = () => this.setState({ screen: 'dosen', dbRecords: loadDb() });
+
+  onNamaChange = (e) => this.setState({ formNama: e.target.value });
+  onNimChange = (e) => this.setState({ formNim: e.target.value });
+  onKelasChange = (e) => this.setState({ formKelas: e.target.value });
+
+  submitRegister = () => {
+    const { formNama, formNim, formKelas } = this.state;
+    if (!formNama.trim() || !formNim.trim() || !formKelas.trim()) {
+      this.setState({ registerError: 'Mohon lengkapi semua isian.' });
+      return;
+    }
+    const student = {
+      id: 'stu_' + Date.now(),
+      nama: formNama.trim(),
+      nim: formNim.trim(),
+      kelas: formKelas.trim(),
+    };
+    this.setState({
+      student,
+      screen: 'cpa',
+      registerError: '',
+      cpaStep: 0,
+    });
+  };
+
+  cpaNext = () => {
+    this.setState((s) => {
+      if (s.cpaStep >= 2) {
+        return { screen: 'quiz', quizIndex: 0, responses: [] , confidenceBefore: 3, confidenceAfter: 3, mcSelected: null, matchSelections: {}, fillValue: '', answered: false, hintShown: false };
+      }
+      return { cpaStep: s.cpaStep + 1 };
+    });
+  };
+  cpaBack = () => {
+    this.setState((s) => {
+      if (s.cpaStep <= 0) return { screen: 'register' };
+      return { cpaStep: s.cpaStep - 1 };
+    });
+  };
+
+  onConfidenceBeforeChange = (e) => this.setState({ confidenceBefore: Number(e.target.value) });
+  onConfidenceAfterChange = (e) => this.setState({ confidenceAfter: Number(e.target.value) });
+  toggleHint = () => this.setState((s) => ({ hintShown: !s.hintShown }));
+  onFillChange = (e) => this.setState({ fillValue: e.target.value });
+  selectMc = (i) => this.setState({ mcSelected: i });
+  setMatchSelection = (i, val) => this.setState((s) => ({ matchSelections: { ...s.matchSelections, [i]: val } }));
+
+  currentQuestion() {
+    const { QUESTIONS, quizIndex } = this.state;
+    return QUESTIONS[quizIndex];
+  }
+
+  checkCorrect(q) {
+    const { mcSelected, matchSelections, fillValue } = this.state;
+    if (q.type === 'mc') return mcSelected === q.correctIndex;
+    if (q.type === 'match') {
+      return q.left.every((_, i) => String(matchSelections[i]) === String(q.correctMap[i]));
+    }
+    if (q.type === 'fill') {
+      const v = String(fillValue || '').toLowerCase().trim();
+      return q.accept.some((a) => a.toLowerCase().trim() === v);
+    }
+    return false;
+  }
+
+  answerText(q) {
+    const { mcSelected, matchSelections, fillValue } = this.state;
+    if (q.type === 'mc') return mcSelected != null ? q.options[mcSelected] : '(tidak dijawab)';
+    if (q.type === 'match') {
+      return q.left.map((l, i) => `${l} → ${q.rightOptions[matchSelections[i]] ?? '?'}`).join('; ');
+    }
+    if (q.type === 'fill') return fillValue || '(tidak dijawab)';
+    return '';
+  }
+
+  submitAnswer = () => {
+    const q = this.currentQuestion();
+    if (!q) return;
+    const correct = this.checkCorrect(q);
+    this.setState({ answered: true, lastCorrect: correct });
+  };
+
+  nextQuestion = () => {
+    const q = this.currentQuestion();
+    const { confidenceBefore, confidenceAfter, responses, quizIndex, QUESTIONS } = this.state;
+    const record = {
+      qId: q.id,
+      type: q.type,
+      prompt: q.prompt,
+      answer: this.answerText(q),
+      correct: this.state.lastCorrect,
+      confidenceBefore,
+      confidenceAfter,
+    };
+    const newResponses = [...responses, record];
+    if (quizIndex + 1 >= QUESTIONS.length) {
+      this.setState({
+        responses: newResponses,
+        screen: 'results',
+        recordSaved: false,
+        reflectionText: '',
+      });
+    } else {
+      this.setState({
+        responses: newResponses,
+        quizIndex: quizIndex + 1,
+        confidenceBefore: 3,
+        confidenceAfter: 3,
+        mcSelected: null,
+        matchSelections: {},
+        fillValue: '',
+        answered: false,
+        hintShown: false,
+      });
+    }
+  };
+
+  onReflectionChange = (e) => this.setState({ reflectionText: e.target.value });
+
+  finalizeRecord = () => {
+    const { student, responses, reflectionText } = this.state;
+    const correctCount = responses.filter((r) => r.correct).length;
+    const avgBefore = responses.reduce((a, r) => a + r.confidenceBefore, 0) / (responses.length || 1);
+    const avgAfter = responses.reduce((a, r) => a + r.confidenceAfter, 0) / (responses.length || 1);
+    const fullRecord = {
+      id: student.id,
+      nama: student.nama,
+      nim: student.nim,
+      kelas: student.kelas,
+      timestamp: new Date().toLocaleString('id-ID'),
+      score: Math.round((correctCount / responses.length) * 100),
+      correctCount,
+      total: responses.length,
+      avgConfBefore: Math.round(avgBefore * 10) / 10,
+      avgConfAfter: Math.round(avgAfter * 10) / 10,
+      reflection: reflectionText.trim() || '(tidak ada refleksi)',
+      answers: responses,
+    };
+    const db = loadDb();
+    db.push(fullRecord);
+    saveDb(db);
+    this.setState({ recordSaved: true, dbRecords: db, savedRecord: fullRecord });
+  };
+
+  exportOwnPdf = () => {
+    const r = this.state.savedRecord;
+    if (!r || !window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 18;
+    doc.setFontSize(16); doc.text('Hasil Belajar - Metakognitif AI Matriks Aljabar Linear', 14, y); y += 10;
+    doc.setFontSize(11);
+    doc.text(`Nama: ${r.nama}    NIM: ${r.nim}    Kelas: ${r.kelas}`, 14, y); y += 7;
+    doc.text(`Skor: ${r.score}%  (${r.correctCount}/${r.total} benar)   Waktu: ${r.timestamp}`, 14, y); y += 7;
+    doc.text(`Rata Keyakinan Awal: ${r.avgConfBefore}/5   Rata Keyakinan Akhir: ${r.avgConfAfter}/5`, 14, y); y += 10;
+    r.answers.forEach((a, i) => {
+      if (y > 270) { doc.addPage(); y = 18; }
+      doc.setFontSize(10);
+      const promptLines = doc.splitTextToSize(`${i + 1}. ${a.prompt}`, 180);
+      doc.text(promptLines, 14, y); y += promptLines.length * 5;
+      const ansLines = doc.splitTextToSize(`Jawaban: ${a.answer} — ${a.correct ? 'Benar' : 'Salah'} (Keyakinan ${a.confidenceBefore}->${a.confidenceAfter})`, 180);
+      doc.text(ansLines, 14, y); y += ansLines.length * 5 + 4;
+    });
+    doc.setFontSize(10);
+    const refLines = doc.splitTextToSize(`Refleksi: ${r.reflection}`, 180);
+    if (y > 260) { doc.addPage(); y = 18; }
+    doc.text(refLines, 14, y);
+    doc.save(`hasil_${r.nim}.pdf`);
+  };
+
+  exportOwnExcel = () => {
+    const r = this.state.savedRecord;
+    if (!r || !window.XLSX) return;
+    const rows = r.answers.map((a, i) => ({
+      No: i + 1, Pertanyaan: a.prompt, Jawaban: a.answer,
+      Benar: a.correct ? 'Ya' : 'Tidak',
+      'Keyakinan Awal': a.confidenceBefore, 'Keyakinan Akhir': a.confidenceAfter,
+    }));
+    const summary = [{ Nama: r.nama, NIM: r.nim, Kelas: r.kelas, Skor: r.score, Waktu: r.timestamp, Refleksi: r.reflection }];
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(summary), 'Ringkasan');
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(rows), 'Detail Jawaban');
+    window.XLSX.writeFile(wb, `hasil_${r.nim}.xlsx`);
+  };
+
+  exportAllPdf = () => {
+    const db = loadDb();
+    if (!window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 18;
+    doc.setFontSize(16); doc.text('Rekap Seluruh Mahasiswa - Metakognitif AI Matriks', 14, y); y += 10;
+    doc.setFontSize(10);
+    db.forEach((r, i) => {
+      if (y > 270) { doc.addPage(); y = 18; }
+      doc.text(`${i + 1}. ${r.nama} (${r.nim}, ${r.kelas}) — Skor ${r.score}% — Keyakinan ${r.avgConfBefore}->${r.avgConfAfter} — ${r.timestamp}`, 14, y);
+      y += 7;
+    });
+    doc.save('rekap_semua_mahasiswa.pdf');
+  };
+
+  exportAllExcel = () => {
+    const db = loadDb();
+    if (!window.XLSX) return;
+    const rows = db.map((r) => ({
+      Nama: r.nama, NIM: r.nim, Kelas: r.kelas, Skor: r.score,
+      'Keyakinan Awal': r.avgConfBefore, 'Keyakinan Akhir': r.avgConfAfter,
+      Waktu: r.timestamp, Refleksi: r.reflection,
+    }));
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(rows), 'Rekap');
+    window.XLSX.writeFile(wb, 'rekap_semua_mahasiswa.xlsx');
+  };
+
+  toggleExpand = (id) => this.setState((s) => ({ expandedRows: { ...s.expandedRows, [id]: !s.expandedRows[id] } }));
+
+  renderVals() {
+    const s = this.state;
+    const screen = s.screen;
+    const q = s.QUESTIONS[s.quizIndex];
+
+    let cpaVals = {};
+    if (s.CPA_STAGES.length) {
+      const stage = s.CPA_STAGES[s.cpaStep];
+      const dlc = DL_COLORS[stage.dlLabel] || DL_COLORS['Meaningful Learning'];
+      cpaVals = {
+        cpaStageLabel: stage.label,
+        cpaDlLabel: stage.dlLabel,
+        cpaBadgeBg: dlc.bg,
+        cpaBadgeColor: dlc.color,
+        cpaTitle: stage.title,
+        cpaNarration: stage.narration,
+        cpaDetail: stage.detail,
+        cpaIsConcrete: stage.key === 'concrete',
+        cpaIsPictorial: stage.key === 'pictorial',
+        cpaIsAbstract: stage.key === 'abstract',
+        cpaNextLabel: s.cpaStep >= 2 ? 'Mulai Kuis →' : 'Lanjut',
+        cpaDots: CPA_KEYS.map((k, i) => ({
+          width: i === s.cpaStep ? '28px' : '10px',
+          bg: i <= s.cpaStep ? 'oklch(52% 0.16 264)' : 'oklch(90% 0.01 264)',
+        })),
+      };
+    }
+
+    let quizVals = {};
+    if (q) {
+      const dlc = DL_COLORS[q.dl] || DL_COLORS['Meaningful Learning'];
+      quizVals = {
+        quizNumber: s.quizIndex + 1,
+        quizProgressPct: Math.round(((s.quizIndex) / s.QUESTIONS.length) * 100) + '%',
+        quizStageLabel: q.stage,
+        quizDl: q.dl,
+        quizBadgeBg: dlc.bg,
+        quizBadgeColor: dlc.color,
+        quizPrompt: q.prompt,
+        quizIsMc: q.type === 'mc',
+        quizIsMatch: q.type === 'match',
+        quizIsFill: q.type === 'fill',
+        quizFillPlaceholder: q.placeholder || '',
+        quizHint: q.hint,
+        quizNotAnswered: !s.answered,
+        quizAnswered: s.answered,
+        quizExplanation: q.explanation,
+        feedbackHeadline: s.lastCorrect ? 'Benar! Nasrullah setuju denganmu.' : 'Belum tepat, tapi ini bagian dari belajar.',
+        feedbackBannerStyle: `padding:16px 18px;border-radius:12px;background:${s.lastCorrect ? 'oklch(95% 0.04 145)' : 'oklch(95% 0.05 25)'};`,
+        nextButtonLabel: s.quizIndex + 1 >= s.QUESTIONS.length ? 'Lihat Hasil Akhir' : 'Soal Berikutnya',
+      };
+
+      if (q.type === 'mc') {
+        quizVals.mcRows = q.options.map((text, i) => {
+          let bg = '#fff', border = 'oklch(88% 0.01 264)', color = 'oklch(22% 0.02 264)';
+          if (s.answered) {
+            if (i === q.correctIndex) { bg = 'oklch(95% 0.04 145)'; border = 'oklch(55% 0.14 145)'; }
+            else if (i === s.mcSelected) { bg = 'oklch(95% 0.05 25)'; border = 'oklch(55% 0.18 25)'; }
+          } else if (i === s.mcSelected) {
+            bg = 'oklch(95% 0.03 264)'; border = 'oklch(52% 0.16 264)';
+          }
+          return {
+            text,
+            onClick: s.answered ? undefined : () => this.selectMc(i),
+            style: `padding:13px 16px;border-radius:10px;border:1.5px solid ${border};background:${bg};color:${color};font-size:14px;margin-bottom:10px;cursor:${s.answered ? 'default' : 'pointer'};transition:all 0.15s ease;`,
+          };
+        });
+      }
+      if (q.type === 'match') {
+        const n = q.rightOptions.length;
+        quizVals.matchRows = q.left.map((text, i) => {
+          const order = [...Array(n).keys()];
+          const rotated = order.slice(i % n).concat(order.slice(0, i % n));
+          return {
+            text,
+            selected: s.matchSelections[i] ?? '',
+            onChange: (e) => this.setMatchSelection(i, e.target.value),
+            options: rotated.map((j) => ({ value: j, label: q.rightOptions[j] })),
+          };
+        });
+      }
+    }
+
+    const correctCount = s.responses.filter((r) => r.correct).length;
+    const avgBefore = s.responses.length ? Math.round((s.responses.reduce((a, r) => a + r.confidenceBefore, 0) / s.responses.length) * 10) / 10 : 0;
+    const avgAfter = s.responses.length ? Math.round((s.responses.reduce((a, r) => a + r.confidenceAfter, 0) / s.responses.length) * 10) / 10 : 0;
+
+    const dbRows = s.dbRecords.map((r) => ({
+      nama: r.nama, nim: r.nim, kelas: r.kelas,
+      scorePct: r.score,
+      scoreColor: r.score >= 70 ? 'oklch(45% 0.14 145)' : r.score >= 40 ? 'oklch(50% 0.12 80)' : 'oklch(50% 0.16 25)',
+      confBefore: r.avgConfBefore, confAfter: r.avgConfAfter,
+      expanded: !!s.expandedRows[r.id],
+      toggleLabel: s.expandedRows[r.id] ? 'Tutup' : 'Detail',
+      toggle: () => this.toggleExpand(r.id),
+      timestamp: r.timestamp,
+      reflection: r.reflection,
+      answers: r.answers.map((a, i) => {
+        const dlc = DL_COLORS['Meaningful Learning'];
+        return {
+          num: i + 1,
+          badgeBg: a.correct ? 'oklch(95% 0.04 145)' : 'oklch(95% 0.05 25)',
+          badgeColor: a.correct ? 'oklch(40% 0.12 145)' : 'oklch(45% 0.14 25)',
+          prompt: a.prompt,
+          answerText: a.answer,
+          resultLabel: a.correct ? 'Benar' : 'Salah',
+        };
+      }),
+    }));
+
+    return {
+      screenLanding: screen === 'landing',
+      screenRegister: screen === 'register',
+      screenCpa: screen === 'cpa',
+      screenQuiz: screen === 'quiz',
+      screenResults: screen === 'results',
+      screenDosen: screen === 'dosen',
+      hasActiveStudent: !!s.student,
+      studentName: s.student ? s.student.nama : '',
+      goLanding: this.goLanding, goRegister: this.goRegister, goDosen: this.goDosen,
+      formNama: s.formNama, formNim: s.formNim, formKelas: s.formKelas,
+      onNamaChange: this.onNamaChange, onNimChange: this.onNimChange, onKelasChange: this.onKelasChange,
+      registerError: s.registerError, submitRegister: this.submitRegister,
+      cpaBack: this.cpaBack, cpaNext: this.cpaNext,
+      ...cpaVals,
+      confidenceBefore: s.confidenceBefore, confidenceAfter: s.confidenceAfter,
+      onConfidenceBeforeChange: this.onConfidenceBeforeChange, onConfidenceAfterChange: this.onConfidenceAfterChange,
+      hintShown: s.hintShown, toggleHint: this.toggleHint,
+      fillValue: s.fillValue, onFillChange: this.onFillChange,
+      submitAnswer: this.submitAnswer, nextQuestion: this.nextQuestion,
+      submitDisabled: q ? (q.type === 'mc' ? s.mcSelected == null : q.type === 'fill' ? !s.fillValue.trim() : q.type === 'match' ? q.left.some((_, i) => s.matchSelections[i] == null || s.matchSelections[i] === '') : true) : true,
+      submitButtonStyle: `background:oklch(52% 0.16 264);border:none;color:#fff;font-size:13.5px;font-weight:600;padding:11px 26px;border-radius:8px;cursor:pointer;opacity:${(q && (q.type === 'mc' ? s.mcSelected == null : q.type === 'fill' ? !s.fillValue.trim() : q.type === 'match' ? q.left.some((_, i) => s.matchSelections[i] == null || s.matchSelections[i] === '') : true)) ? '0.45' : '1'};`,
+      ...quizVals,
+      correctCount, scorePct: s.responses.length ? Math.round((correctCount / s.responses.length) * 100) : 0,
+      avgConfBefore: avgBefore, avgConfAfter: avgAfter,
+      recordSaved: s.recordSaved, recordNotSaved: !s.recordSaved,
+      reflectionText: s.reflectionText, onReflectionChange: this.onReflectionChange,
+      finalizeRecord: this.finalizeRecord,
+      exportOwnPdf: this.exportOwnPdf, exportOwnExcel: this.exportOwnExcel,
+      exportAllPdf: this.exportAllPdf, exportAllExcel: this.exportAllExcel,
+      dbEmpty: s.dbRecords.length === 0, dbNotEmpty: s.dbRecords.length > 0,
+      dbCountLabel: s.dbRecords.length === 0 ? 'Belum ada data mahasiswa.' : `${s.dbRecords.length} mahasiswa telah mengisi jawaban.`,
+      dbRows,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
